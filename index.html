@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Shooter</title>
+    <script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #000428, #004e92);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        #gameContainer {
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+        
+        canvas {
+            display: block;
+            background: #000;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #0ff;
+            font-size: 20px;
+            text-shadow: 0 0 10px #0ff;
+            z-index: 10;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #f00;
+            font-size: 48px;
+            text-shadow: 0 0 20px #f00;
+            display: none;
+            z-index: 20;
+        }
+        
+        #gameOver button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 24px;
+            background: #0ff;
+            border: none;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            text-shadow: none;
+            box-shadow: 0 0 20px #0ff;
+        }
+        
+        #gameOver button:hover {
+            background: #0aa;
+        }
+        
+        #levelComplete {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #0f0;
+            font-size: 48px;
+            text-shadow: 0 0 20px #0f0;
+            display: none;
+            z-index: 20;
+            background: rgba(0, 50, 0, 0.9);
+            padding: 50px;
+            border: 5px solid #0f0;
+            border-radius: 20px;
+            box-shadow: 0 0 40px #0f0;
+        }
+        
+        #levelComplete button {
+            margin: 20px 10px 0 10px;
+            padding: 15px 30px;
+            font-size: 24px;
+            background: #0f0;
+            border: none;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            text-shadow: none;
+            box-shadow: 0 0 20px #0f0;
+            font-weight: bold;
+        }
+        
+        #levelComplete button:hover {
+            background: #0a0;
+        }
+        
+        #victoryScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #0f0;
+            font-size: 48px;
+            text-shadow: 0 0 30px #0f0;
+            display: none;
+            z-index: 25;
+            background: rgba(0, 80, 0, 0.95);
+            padding: 60px;
+            border: 6px solid #0f0;
+            border-radius: 20px;
+            box-shadow: 0 0 50px #0f0;
+        }
+        
+        #victoryScreen button {
+            margin: 20px 10px 0 10px;
+            padding: 15px 30px;
+            font-size: 24px;
+            background: #0f0;
+            border: none;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            text-shadow: none;
+            box-shadow: 0 0 20px #0f0;
+            font-weight: bold;
+        }
+        
+        #victoryScreen button:hover {
+            background: #0a0;
+        }
+        
+        #level5GameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #0f0;
+            font-size: 48px;
+            text-shadow: 0 0 20px #0f0;
+            display: none;
+            z-index: 20;
+            background: rgba(0, 50, 0, 0.9);
+            padding: 50px;
+            border: 5px solid #0f0;
+            border-radius: 20px;
+            box-shadow: 0 0 40px #0f0;
+        }
+        
+        #level5GameOver button {
+            margin: 20px 10px 0 10px;
+            padding: 15px 30px;
+            font-size: 24px;
+            background: #0f0;
+            border: none;
+            color: #000;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            text-shadow: none;
+            box-shadow: 0 0 20px #0f0;
+            font-weight: bold;
+        }
+        
+        #level5GameOver button:hover {
+            background: #0a0;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #0ff;
+            font-size: 14px;
+            text-align: center;
+            text-shadow: 0 0 5px #0ff;
+        }
+        
+        #skipButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #0ff;
+            border: 2px solid #0ff;
+            color: #000;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px #0ff;
+            z-index: 10;
+        }
+        
+        #skipButton:hover {
+            background: #0aa;
+            border-color: #0aa;
+        }
+        
+        #touchControls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            z-index: 15;
+            user-select: none;
+        }
+        
+        .touchButton {
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 255, 255, 0.3);
+            border: 3px solid #0ff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+            cursor: pointer;
+            transition: all 0.1s;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Smaller buttons on small screens */
+        @media (max-width: 600px) {
+            .touchButton {
+                width: 65px;
+                height: 65px;
+                font-size: 32px;
+            }
+            
+            #touchControls {
+                bottom: 10px;
+                gap: 30px;
+            }
+        }
+        
+        .touchButton:active {
+            background: rgba(0, 255, 255, 0.6);
+            transform: scale(0.95);
+            box-shadow: 0 0 20px #0ff;
+        }
+        
+        .touchButton.pressed {
+            background: rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 20px #0ff;
+        }
+        
+        /* Hide touch controls on desktop devices */
+        @media (hover: hover) and (pointer: fine) {
+            #touchControls {
+                display: none;
+            }
+        }
+        
+        /* Always show touch controls - uncomment to test on desktop */
+        /* #touchControls { display: flex !important; } */
+        
+        #levelUp {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #0ff;
+            font-size: 72px;
+            text-shadow: 0 0 30px #0ff;
+            display: none;
+            z-index: 15;
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="color: #0ff; font-size: 48px; font-family: 'Courier New', monospace; text-shadow: 0 0 20px #0ff; margin-bottom: 30px;">SPACE SHOOTER</div>
+        <div style="color: #0ff; font-size: 24px; font-family: 'Courier New', monospace;">Loading...</div>
+        <div style="width: 300px; height: 20px; border: 2px solid #0ff; margin-top: 20px; border-radius: 10px; overflow: hidden;">
+            <div id="loadingBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #0ff, #00f); transition: width 0.3s;"></div>
+        </div>
+    </div>
+    
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui">
+            <div>LEVEL: <span id="level">1</span></div>
+            <div>SCORE: <span id="score">0</span></div>
+            <div>LIVES: <span id="lives">3</span></div>
+            <div style="color: #f00;">ESCAPED: <span id="escaped">0</span>/20</div>
+            <div id="bossTimer" style="color: #f00; display: none; font-size: 24px; margin-top: 10px; text-shadow: 0 0 15px #f00;">TIME: <span id="timerCount">100</span>s</div>
+            <div id="shipUpgradeIndicator" style="color: #ffd700; display: none; margin-top: 5px; text-shadow: 0 0 10px #ffd700;">⭐ UPGRADED SHIP ⭐</div>
+            <div id="multiShotIndicator" style="color: #ff0; display: none; margin-top: 10px; text-shadow: 0 0 10px #ff0;">⚡ MULTI-SHOT ACTIVE ⚡</div>
+        </div>
+        <button id="skipButton" onclick="skipLevel()">SKIP LEVEL →</button>
+        <div id="gameOver">
+            <div>GAME OVER</div>
+            <div style="font-size: 24px; margin-top: 10px;">FINAL SCORE: <span id="finalScore">0</span></div>
+            <button onclick="restartGame()">PLAY AGAIN</button>
+        </div>
+        <div id="levelComplete">
+            <div>LEVEL COMPLETE!</div>
+            <div style="font-size: 32px; margin-top: 10px;">LEVEL <span id="completedLevel">1</span></div>
+            <div style="font-size: 24px; margin-top: 10px;">SCORE: <span id="levelScore">0</span></div>
+            <div>
+                <button onclick="retryLevel()">RETRY LEVEL</button>
+                <button onclick="nextLevel()">NEXT LEVEL</button>
+            </div>
+        </div>
+        <div id="victoryScreen">
+            <div>🎉 VICTORY! 🎉</div>
+            <div style="font-size: 36px; margin-top: 15px;">YOU COMPLETED ALL LEVELS!</div>
+            <div style="font-size: 24px; margin-top: 10px;">FINAL SCORE: <span id="victoryScore">0</span></div>
+            <div style="font-size: 20px; margin-top: 10px; color: #8f8;">You unlocked the Ultimate Ship!</div>
+            <div>
+                <button onclick="retryFinalLevel()">REPLAY LEVEL 5</button>
+                <button onclick="restartGame()">RESTART FROM LEVEL 1</button>
+            </div>
+        </div>
+        <div id="level5GameOver">
+            <div style="color: #ff0;">LEVEL 5 FAILED</div>
+            <div style="font-size: 28px; margin-top: 10px;">Defeat the boss before time runs out!</div>
+            <div style="font-size: 24px; margin-top: 10px;">SCORE: <span id="level5Score">0</span></div>
+            <div>
+                <button onclick="retryFinalLevel()">TRY AGAIN</button>
+            </div>
+        </div>
+        <div id="levelUp">
+            <div>LEVEL UP!</div>
+            <div style="font-size: 36px; margin-top: 10px;">LEVEL <span id="newLevel"></span></div>
+        </div>
+        <div id="instructions">
+            LEFT/RIGHT ARROW KEYS or TOUCH CONTROLS to move • Auto-firing • Complete all 5 levels! • Don't let 20 enemies escape!
+        </div>
+    </div>
+    
+    <!-- Touch Controls for Mobile -->
+    <div id="touchControls">
+        <div class="touchButton" id="touchLeft" data-key="ArrowLeft">◄</div>
+        <div class="touchButton" id="touchRight" data-key="ArrowRight">►</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 800;
+        canvas.height = 600;
+        
+        // Game state
+        let gameState = {
+            score: 0,
+            lives: 3,
+            gameOver: false,
+            levelComplete: false,
+            keys: {},
+            lastShot: 0,
+            shootCooldown: 150,
+            multiShot: false,
+            multiShotTimer: 0,
+            multiShotDuration: 10000,
+            level: 1,
+            levelStartScore: 0,
+            lastScoreTime: 0,
+            scoreInterval: 1000,
+            escapedEnemies: 0,
+            maxEscapedEnemies: 20,
+            shipLevel: 0,
+            bossTimer: 100,
+            bossStartTime: 0
+        };
+        
+        // Player
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 80,
+            width: 40,
+            height: 40,
+            speed: 5
+        };
+        
+        // Arrays for game objects
+        let bullets = [];
+        let enemies = [];
+        let particles = [];
+        let stars = [];
+        let powerups = [];
+        let boss = null;
+        let bossBullets = [];
+        
+        // Create star field
+        for (let i = 0; i < 100; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2,
+                speed: Math.random() * 2 + 1
+            });
+        }
+        
+        // Enemy spawning
+        let enemySpawnTimer = 0;
+        const enemySpawnInterval = 1000;
+        
+        // Powerup spawning
+        let powerupSpawnTimer = 0;
+        const powerupSpawnInterval = 15000;
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key] = true;
+            
+            if (e.key === ' ' && !gameState.gameOver) {
+                e.preventDefault();
+                shoot();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key] = false;
+        });
+        
+        // Touch Controls
+        const touchButtons = document.querySelectorAll('.touchButton');
+        
+        touchButtons.forEach(button => {
+            const key = button.dataset.key;
+            
+            // Touch start - activate control
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                gameState.keys[key] = true;
+                button.classList.add('pressed');
+            }, { passive: false });
+            
+            // Touch end - deactivate control
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                gameState.keys[key] = false;
+                button.classList.remove('pressed');
+            }, { passive: false });
+            
+            // Touch cancel - deactivate control (if finger moves off button)
+            button.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                gameState.keys[key] = false;
+                button.classList.remove('pressed');
+            }, { passive: false });
+            
+            // Mouse events for testing on desktop
+            button.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                gameState.keys[key] = true;
+                button.classList.add('pressed');
+            });
+            
+            button.addEventListener('mouseup', (e) => {
+                e.preventDefault();
+                gameState.keys[key] = false;
+                button.classList.remove('pressed');
+            });
+            
+            button.addEventListener('mouseleave', (e) => {
+                gameState.keys[key] = false;
+                button.classList.remove('pressed');
+            });
+        });
+        
+        function shoot() {
+            const now = Date.now();
+            if (now - gameState.lastShot > gameState.shootCooldown) {
+                if (gameState.shipLevel === 2) {
+                    // Super upgraded ship (Level 5+)
+                    if (gameState.multiShot) {
+                        // Nine shot spread
+                        for (let i = -4; i <= 4; i++) {
+                            bullets.push({
+                                x: player.x + (i * 8),
+                                y: player.y,
+                                width: 4,
+                                height: 15,
+                                speed: 8
+                            });
+                        }
+                    } else {
+                        // Triple shot
+                        bullets.push({
+                            x: player.x - 15,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x + 15,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                    }
+                } else if (gameState.shipLevel === 1) {
+                    // Upgraded ship (Level 4)
+                    if (gameState.multiShot) {
+                        // Six shot spread
+                        bullets.push({
+                            x: player.x - 25,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x - 15,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x - 5,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x + 5,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x + 15,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x + 25,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                    } else {
+                        // Double shot
+                        bullets.push({
+                            x: player.x - 10,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x + 10,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                    }
+                } else {
+                    // Normal ship (Level 1-3)
+                    if (gameState.multiShot) {
+                        // Triple shot
+                        bullets.push({
+                            x: player.x,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x - 15,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                        bullets.push({
+                            x: player.x + 15,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                    } else {
+                        // Single shot
+                        bullets.push({
+                            x: player.x,
+                            y: player.y,
+                            width: 4,
+                            height: 15,
+                            speed: 8
+                        });
+                    }
+                }
+                gameState.lastShot = now;
+            }
+        }
+        
+        function spawnEnemy() {
+            const baseSize = 30 + Math.random() * 20;
+            const size = baseSize + (gameState.level - 1) * 3; // Reduced from 5 to 3
+            const baseSpeed = 1 + Math.random() * 2;
+            const speed = baseSpeed + (gameState.level - 1) * 0.2; // Reduced from 0.3 to 0.2
+            const hpMultiplier = 1 + (gameState.level - 1) * 0.3; // Reduced from 0.5 to 0.3
+            
+            enemies.push({
+                x: Math.random() * (canvas.width - size),
+                y: -size,
+                width: size,
+                height: size,
+                speed: speed,
+                hp: Math.floor((size / 15) * hpMultiplier),
+                maxHp: Math.floor((size / 15) * hpMultiplier)
+            });
+        }
+        
+        function spawnBoss() {
+            const bossSize = 120;
+            boss = {
+                x: canvas.width / 2 - bossSize / 2,
+                y: -bossSize,
+                width: bossSize,
+                height: bossSize,
+                speed: 0.5,
+                hp: 2000,
+                maxHp: 2000,
+                moveDirection: 1,
+                targetY: 100,
+                lastShot: 0,
+                shootCooldown: 1500
+            };
+        }
+        
+        function spawnPowerup() {
+            powerups.push({
+                x: Math.random() * (canvas.width - 30),
+                y: -30,
+                width: 30,
+                height: 30,
+                speed: 2,
+                type: 'multishot'
+            });
+        }
+        
+        function updatePowerups() {
+            powerups = powerups.filter(powerup => {
+                powerup.y += powerup.speed;
+                
+                // Check if player collected powerup
+                if (checkCollision(powerup, player)) {
+                    if (powerup.type === 'multishot') {
+                        gameState.multiShot = true;
+                        gameState.multiShotTimer = Date.now();
+                        createParticles(powerup.x + powerup.width / 2, powerup.y + powerup.height / 2, 20, '#ff0');
+                    }
+                    return false;
+                }
+                
+                return powerup.y < canvas.height + powerup.height;
+            });
+        }
+        
+        function updateBoss() {
+            if (!boss) return;
+            
+            // Move boss down to target position
+            if (boss.y < boss.targetY) {
+                boss.y += boss.speed;
+            } else {
+                // Move boss left and right
+                boss.x += boss.moveDirection * 2;
+                
+                // Reverse direction at edges
+                if (boss.x <= 0 || boss.x >= canvas.width - boss.width) {
+                    boss.moveDirection *= -1;
+                }
+                
+                // Boss shooting - 4 bullets at a time
+                const now = Date.now();
+                if (now - boss.lastShot > boss.shootCooldown) {
+                    // Shoot 4 bullets spread across the boss width
+                    const spacing = boss.width / 5;
+                    for (let i = 0; i < 4; i++) {
+                        bossBullets.push({
+                            x: boss.x + spacing * (i + 1),
+                            y: boss.y + boss.height,
+                            width: 6,
+                            height: 20,
+                            speed: 5
+                        });
+                    }
+                    boss.lastShot = now;
+                }
+            }
+            
+            // Check if boss hit player
+            if (checkCollision(boss, player)) {
+                gameState.lives--;
+                createParticles(player.x + player.width / 2, player.y + player.height / 2, 20, '#f00');
+                updateUI();
+                
+                if (gameState.lives <= 0) {
+                    endGame();
+                }
+            }
+        }
+        
+        function updateBossBullets() {
+            bossBullets = bossBullets.filter(bullet => {
+                bullet.y += bullet.speed;
+                
+                // Check if boss bullet hit player
+                if (checkCollision(bullet, player)) {
+                    gameState.lives--;
+                    createParticles(player.x + player.width / 2, player.y + player.height / 2, 20, '#f00');
+                    updateUI();
+                    
+                    if (gameState.lives <= 0) {
+                        endGame();
+                    }
+                    return false;
+                }
+                
+                return bullet.y < canvas.height + bullet.height;
+            });
+        }
+        
+        function createParticles(x, y, count, color) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    life: 1,
+                    color: color
+                });
+            }
+        }
+        
+        function updatePlayer() {
+            if (gameState.keys['ArrowLeft'] && player.x > 0) {
+                player.x -= player.speed;
+            }
+            if (gameState.keys['ArrowRight'] && player.x < canvas.width - player.width) {
+                player.x += player.speed;
+            }
+        }
+        
+        function updateBullets() {
+            bullets = bullets.filter(bullet => {
+                bullet.y -= bullet.speed;
+                return bullet.y > -bullet.height;
+            });
+        }
+        
+        function updateEnemies() {
+            enemies = enemies.filter(enemy => {
+                enemy.y += enemy.speed;
+                
+                // Check if enemy hit player
+                if (checkCollision(enemy, player)) {
+                    gameState.lives--;
+                    createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 20, '#f00');
+                    updateUI();
+                    
+                    if (gameState.lives <= 0) {
+                        endGame();
+                    }
+                    return false;
+                }
+                
+                // Check if enemy escaped off the bottom
+                if (enemy.y > canvas.height) {
+                    gameState.escapedEnemies++;
+                    updateUI();
+                    
+                    // If 5 enemies escaped, game over
+                    if (gameState.escapedEnemies >= gameState.maxEscapedEnemies) {
+                        endGame();
+                    }
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+        
+        function updateParticles() {
+            particles = particles.filter(particle => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life -= 0.02;
+                return particle.life > 0;
+            });
+        }
+        
+        function updateStars() {
+            stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+        }
+        
+        function checkCollisions() {
+            bullets.forEach((bullet, bulletIndex) => {
+                // Check boss collisions
+                if (boss && checkCollision(bullet, boss)) {
+                    bullets.splice(bulletIndex, 1);
+                    boss.hp--;
+                    
+                    if (boss.hp <= 0) {
+                        // Boss defeated!
+                        createParticles(boss.x + boss.width / 2, boss.y + boss.height / 2, 50, '#f00');
+                        boss = null;
+                        gameState.levelComplete = true;
+                        
+                        // Set final score to 500 for completing all levels
+                        gameState.score = 500;
+                        
+                        // Stop gameplay tracking for Poki
+                        if (typeof PokiSDK !== 'undefined') {
+                            PokiSDK.gameplayStop();
+                        }
+                        
+                        // Show victory screen
+                        document.getElementById('victoryScore').textContent = gameState.score;
+                        document.getElementById('victoryScreen').style.display = 'block';
+                        document.getElementById('skipButton').style.display = 'none';
+                        
+                        // Celebration particles
+                        for (let i = 0; i < 150; i++) {
+                            createParticles(
+                                Math.random() * canvas.width,
+                                Math.random() * canvas.height,
+                                1,
+                                '#0f0'
+                            );
+                        }
+                    } else {
+                        createParticles(bullet.x, bullet.y, 5, '#ff0');
+                    }
+                    return;
+                }
+                
+                // Check enemy collisions
+                enemies.forEach((enemy, enemyIndex) => {
+                    if (checkCollision(bullet, enemy)) {
+                        bullets.splice(bulletIndex, 1);
+                        enemy.hp--;
+                        
+                        if (enemy.hp <= 0) {
+                            createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 15, '#0ff');
+                            enemies.splice(enemyIndex, 1);
+                        } else {
+                            createParticles(bullet.x, bullet.y, 5, '#ff0');
+                        }
+                    }
+                });
+            });
+        }
+        
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+        
+        function drawPlayer() {
+            // Draw ship body with different colors for each level
+            if (gameState.shipLevel === 2) {
+                // Super upgraded ship - magenta/purple color
+                ctx.fillStyle = '#f0f';
+            } else if (gameState.shipLevel === 1) {
+                // Upgraded ship - gold/yellow color
+                ctx.fillStyle = '#ffd700';
+            } else {
+                // Normal ship - cyan color
+                ctx.fillStyle = '#0ff';
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(player.x + player.width / 2, player.y);
+            ctx.lineTo(player.x, player.y + player.height);
+            ctx.lineTo(player.x + player.width / 2, player.y + player.height * 0.7);
+            ctx.lineTo(player.x + player.width, player.y + player.height);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Engine glow - different configurations for each level
+            ctx.fillStyle = '#f80';
+            if (gameState.shipLevel === 2) {
+                // Super upgraded ship - triple engines
+                ctx.fillRect(player.x + player.width / 2 - 18, player.y + player.height, 5, 8);
+                ctx.fillRect(player.x + player.width / 2 - 2.5, player.y + player.height, 5, 8);
+                ctx.fillRect(player.x + player.width / 2 + 13, player.y + player.height, 5, 8);
+            } else if (gameState.shipLevel === 1) {
+                // Upgraded ship - dual engines
+                ctx.fillRect(player.x + player.width / 2 - 12, player.y + player.height, 6, 8);
+                ctx.fillRect(player.x + player.width / 2 + 6, player.y + player.height, 6, 8);
+            } else {
+                // Normal ship - single engine
+                ctx.fillRect(player.x + player.width / 2 - 3, player.y + player.height, 6, 8);
+            }
+        }
+        
+        function drawBullets() {
+            if (gameState.shipLevel === 2) {
+                ctx.fillStyle = '#f0f';
+                ctx.shadowColor = '#f0f';
+            } else if (gameState.shipLevel === 1) {
+                ctx.fillStyle = '#ffd700';
+                ctx.shadowColor = '#ffd700';
+            } else {
+                ctx.fillStyle = '#0ff';
+                ctx.shadowColor = '#0ff';
+            }
+            
+            bullets.forEach(bullet => {
+                ctx.shadowBlur = 10;
+                ctx.fillRect(bullet.x - bullet.width / 2, bullet.y, bullet.width, bullet.height);
+                ctx.shadowBlur = 0;
+            });
+        }
+        
+        function drawEnemies() {
+            enemies.forEach(enemy => {
+                // Calculate color based on HP (gets darker red as HP decreases)
+                const hpRatio = enemy.hp / enemy.maxHp;
+                const red = Math.floor(255 * hpRatio + 100 * (1 - hpRatio));
+                ctx.fillStyle = `rgb(${red}, 0, 0)`;
+                
+                // Draw arrow shape pointing down
+                ctx.beginPath();
+                ctx.moveTo(enemy.x + enemy.width / 2, enemy.y + enemy.height); // Bottom point
+                ctx.lineTo(enemy.x + enemy.width, enemy.y); // Top right
+                ctx.lineTo(enemy.x + enemy.width / 2, enemy.y + enemy.height * 0.3); // Middle indent
+                ctx.lineTo(enemy.x, enemy.y); // Top left
+                ctx.closePath();
+                ctx.fill();
+                
+                // Add outline
+                ctx.strokeStyle = '#f00';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // HP bar
+                const hpBarWidth = (enemy.width * 0.8) * (enemy.hp / enemy.maxHp);
+                const hpBarOffset = enemy.width * 0.1;
+                ctx.fillStyle = '#0f0';
+                ctx.fillRect(enemy.x + hpBarOffset, enemy.y - 6, hpBarWidth, 2);
+            });
+        }
+        
+        function drawParticles() {
+            particles.forEach(particle => {
+                ctx.globalAlpha = particle.life;
+                ctx.fillStyle = particle.color;
+                ctx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+            });
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawPowerups() {
+            powerups.forEach(powerup => {
+                // Pulsing glow effect
+                const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7;
+                ctx.globalAlpha = pulse;
+                
+                // Outer glow
+                ctx.fillStyle = '#ff0';
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#ff0';
+                ctx.fillRect(powerup.x - 2, powerup.y - 2, powerup.width + 4, powerup.height + 4);
+                
+                // Inner star shape
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                for (let i = 0; i < 4; i++) {
+                    const angle = (i * Math.PI / 2) - Math.PI / 4;
+                    const x = powerup.x + powerup.width / 2 + Math.cos(angle) * 12;
+                    const y = powerup.y + powerup.height / 2 + Math.sin(angle) * 12;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            });
+        }
+        
+        function drawBoss() {
+            if (!boss) return;
+            
+            // Boss body - larger red arrow with glow
+            ctx.fillStyle = '#f00';
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = '#f00';
+            
+            // Draw large arrow shape pointing down
+            ctx.beginPath();
+            ctx.moveTo(boss.x + boss.width / 2, boss.y + boss.height); // Bottom point
+            ctx.lineTo(boss.x + boss.width, boss.y); // Top right
+            ctx.lineTo(boss.x + boss.width / 2, boss.y + boss.height * 0.3); // Middle indent
+            ctx.lineTo(boss.x, boss.y); // Top left
+            ctx.closePath();
+            ctx.fill();
+            
+            // Boss outline
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            ctx.shadowBlur = 0;
+            
+            // Boss HP bar
+            const hpBarWidth = (boss.width * 0.9) * (boss.hp / boss.maxHp);
+            const hpBarOffset = boss.width * 0.05;
+            
+            // HP bar background
+            ctx.fillStyle = '#300';
+            ctx.fillRect(boss.x + hpBarOffset, boss.y - 20, boss.width * 0.9, 10);
+            
+            // HP bar fill
+            ctx.fillStyle = boss.hp > boss.maxHp * 0.3 ? '#0f0' : '#f00';
+            ctx.fillRect(boss.x + hpBarOffset, boss.y - 20, hpBarWidth, 10);
+            
+            // HP bar border
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(boss.x + hpBarOffset, boss.y - 20, boss.width * 0.9, 10);
+            
+            // Boss name
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px "Courier New"';
+            ctx.textAlign = 'center';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#f00';
+            ctx.fillText('FINAL BOSS', boss.x + boss.width / 2, boss.y - 30);
+            ctx.shadowBlur = 0;
+            ctx.textAlign = 'left';
+        }
+        
+        function drawBossBullets() {
+            ctx.fillStyle = '#f00';
+            ctx.shadowColor = '#f00';
+            
+            bossBullets.forEach(bullet => {
+                ctx.shadowBlur = 10;
+                ctx.fillRect(bullet.x - bullet.width / 2, bullet.y, bullet.width, bullet.height);
+                ctx.shadowBlur = 0;
+            });
+        }
+        
+        function drawStars() {
+            ctx.fillStyle = '#fff';
+            stars.forEach(star => {
+                ctx.globalAlpha = star.size / 2;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+            ctx.globalAlpha = 1;
+        }
+        
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('escaped').textContent = gameState.escapedEnemies;
+            
+            // Show boss timer on level 5, hide escaped counter
+            if (gameState.level === 5) {
+                document.getElementById('bossTimer').style.display = 'block';
+                document.getElementById('timerCount').textContent = gameState.bossTimer;
+                // Color timer based on urgency
+                const timerElement = document.getElementById('bossTimer');
+                if (gameState.bossTimer <= 20) {
+                    timerElement.style.color = '#f00';
+                    timerElement.style.textShadow = '0 0 20px #f00';
+                } else if (gameState.bossTimer <= 50) {
+                    timerElement.style.color = '#ff0';
+                    timerElement.style.textShadow = '0 0 15px #ff0';
+                } else {
+                    timerElement.style.color = '#0f0';
+                    timerElement.style.textShadow = '0 0 15px #0f0';
+                }
+            } else {
+                document.getElementById('bossTimer').style.display = 'none';
+            }
+            
+            // Hide skip button on level 5 (final level)
+            const skipBtn = document.getElementById('skipButton');
+            if (gameState.level >= 5) {
+                skipBtn.style.display = 'none';
+            } else if (!gameState.gameOver && !gameState.levelComplete) {
+                skipBtn.style.display = 'block';
+            }
+            
+            // Update ship upgrade indicator
+            const shipIndicator = document.getElementById('shipUpgradeIndicator');
+            if (gameState.shipLevel === 2) {
+                shipIndicator.style.display = 'block';
+                shipIndicator.style.color = '#f0f';
+                shipIndicator.style.textShadow = '0 0 10px #f0f';
+                shipIndicator.textContent = '⭐⭐ ULTIMATE SHIP ⭐⭐';
+            } else if (gameState.shipLevel === 1) {
+                shipIndicator.style.display = 'block';
+                shipIndicator.style.color = '#ffd700';
+                shipIndicator.style.textShadow = '0 0 10px #ffd700';
+                shipIndicator.textContent = '⭐ UPGRADED SHIP ⭐';
+            } else {
+                shipIndicator.style.display = 'none';
+            }
+            
+            // Update multi-shot indicator
+            const indicator = document.getElementById('multiShotIndicator');
+            if (gameState.multiShot) {
+                indicator.style.display = 'block';
+                if (gameState.shipLevel === 2) {
+                    indicator.textContent = '⚡ 9-SHOT ACTIVE ⚡';
+                } else if (gameState.shipLevel === 1) {
+                    indicator.textContent = '⚡ 6-SHOT ACTIVE ⚡';
+                } else {
+                    indicator.textContent = '⚡ MULTI-SHOT ACTIVE ⚡';
+                }
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+        
+        function checkLevelComplete() {
+            const levelEndScore = gameState.level * 100;
+            if (gameState.score >= levelEndScore && !gameState.levelComplete) {
+                gameState.levelComplete = true;
+                
+                // Stop gameplay tracking for Poki
+                if (typeof PokiSDK !== 'undefined') {
+                    PokiSDK.gameplayStop();
+                }
+                
+                // Check if this is the final level (Level 5)
+                if (gameState.level === 5) {
+                    // Show victory screen
+                    document.getElementById('victoryScore').textContent = gameState.score;
+                    document.getElementById('victoryScreen').style.display = 'block';
+                    document.getElementById('skipButton').style.display = 'none';
+                } else {
+                    // Show normal level complete screen
+                    document.getElementById('completedLevel').textContent = gameState.level;
+                    document.getElementById('levelScore').textContent = gameState.score;
+                    document.getElementById('levelComplete').style.display = 'block';
+                    document.getElementById('skipButton').style.display = 'none';
+                }
+                
+                // Create celebration particles
+                for (let i = 0; i < 100; i++) {
+                    createParticles(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height,
+                        1,
+                        '#0f0'
+                    );
+                }
+            }
+        }
+        
+        function retryLevel() {
+            // Reset to beginning of current level
+            gameState.score = gameState.levelStartScore;
+            gameState.levelComplete = false;
+            gameState.multiShot = false;
+            gameState.multiShotTimer = 0;
+            gameState.lastScoreTime = Date.now();
+            gameState.escapedEnemies = 0;
+            
+            // Reset boss if on level 5
+            if (gameState.level === 5) {
+                gameState.bossTimer = 100;
+                gameState.bossStartTime = 0;
+                boss = null;
+                bossBullets = [];
+            }
+            
+            bullets = [];
+            enemies = [];
+            particles = [];
+            powerups = [];
+            player.x = canvas.width / 2;
+            player.y = canvas.height - 80;
+            enemySpawnTimer = 0;
+            powerupSpawnTimer = 0;
+            
+            document.getElementById('levelComplete').style.display = 'none';
+            document.getElementById('skipButton').style.display = 'block';
+            updateUI();
+            
+            // Resume gameplay tracking for Poki
+            if (typeof PokiSDK !== 'undefined') {
+                PokiSDK.gameplayStart();
+            }
+            
+            gameLoop();
+        }
+        
+        function nextLevel() {
+            // Don't allow advancing past level 5 (final level)
+            if (gameState.level >= 5) return;
+            
+            const advanceLevel = () => {
+                // Advance to next level
+                gameState.level++;
+                gameState.levelStartScore = gameState.score;
+                gameState.levelComplete = false;
+                gameState.multiShot = false;
+                gameState.multiShotTimer = 0;
+                gameState.lastScoreTime = Date.now();
+                gameState.escapedEnemies = 0;
+                
+                // Reset boss for level 5
+                if (gameState.level === 5) {
+                    gameState.bossTimer = 100;
+                    gameState.bossStartTime = 0;
+                    boss = null;
+                    bossBullets = [];
+                }
+                
+                // Upgrade ship after completing level 3 (entering level 4)
+                if (gameState.level === 4 && gameState.shipLevel < 1) {
+                    gameState.shipLevel = 1;
+                    setTimeout(() => {
+                        alert('🚀 SHIP UPGRADED! 🚀\n\nYou now have a dual-cannon ship!\n• Shoots 2 bullets normally\n• Shoots 6 bullets with multi-shot power-up');
+                    }, 100);
+                }
+                
+                // Super upgrade ship after completing level 4 (entering level 5)
+                if (gameState.level === 5 && gameState.shipLevel < 2) {
+                    gameState.shipLevel = 2;
+                    setTimeout(() => {
+                        alert('⚡ ULTIMATE SHIP UPGRADE! ⚡\n\nYou now have a triple-cannon ship!\n• Shoots 3 bullets normally\n• Shoots 9 bullets with multi-shot power-up\n\nPrepare for the FINAL BOSS FIGHT!');
+                    }, 100);
+                }
+                
+                bullets = [];
+                enemies = [];
+                particles = [];
+                powerups = [];
+                player.x = canvas.width / 2;
+                player.y = canvas.height - 80;
+                enemySpawnTimer = 0;
+                powerupSpawnTimer = 0;
+                
+                document.getElementById('levelComplete').style.display = 'none';
+                document.getElementById('skipButton').style.display = 'block';
+                updateUI();
+                
+                // Resume gameplay tracking for Poki
+                if (typeof PokiSDK !== 'undefined') {
+                    PokiSDK.gameplayStart();
+                }
+                
+                gameLoop();
+            };
+            
+            // Show commercial break between levels, then advance
+            if (typeof PokiSDK !== 'undefined') {
+                PokiSDK.commercialBreak().then(() => {
+                    advanceLevel();
+                });
+            } else {
+                advanceLevel();
+            }
+        }
+        
+        function skipLevel() {
+            if (gameState.gameOver || gameState.levelComplete) return;
+            
+            // Don't allow skipping past level 5 (final level)
+            if (gameState.level >= 5) return;
+            
+            const performSkip = () => {
+                // Skip to next level
+                gameState.level++;
+                
+                // Set score to the starting score for this level
+                gameState.score = (gameState.level - 1) * 100;
+                gameState.levelStartScore = gameState.score;
+                
+                gameState.multiShot = false;
+                gameState.multiShotTimer = 0;
+                gameState.lastScoreTime = Date.now();
+                gameState.escapedEnemies = 0;
+                
+                // Reset boss if entering level 5
+                if (gameState.level === 5) {
+                    gameState.bossTimer = 100;
+                    gameState.bossStartTime = 0;
+                    boss = null;
+                    bossBullets = [];
+                }
+                
+                // Upgrade ship based on level reached
+                if (gameState.level >= 5 && gameState.shipLevel < 2) {
+                    gameState.shipLevel = 2;
+                } else if (gameState.level >= 4 && gameState.shipLevel < 1) {
+                    gameState.shipLevel = 1;
+                }
+                
+                bullets = [];
+                enemies = [];
+                particles = [];
+                powerups = [];
+                player.x = canvas.width / 2;
+                player.y = canvas.height - 80;
+                enemySpawnTimer = 0;
+                powerupSpawnTimer = 0;
+                
+                updateUI();
+            };
+            
+            // Show ad before allowing skip
+            if (typeof PokiSDK !== 'undefined') {
+                // Stop gameplay for ad
+                PokiSDK.gameplayStop();
+                
+                // Show commercial break, then skip level
+                PokiSDK.commercialBreak().then(() => {
+                    performSkip();
+                    // Resume gameplay after skip
+                    PokiSDK.gameplayStart();
+                });
+            } else {
+                // No SDK available, just skip
+                performSkip();
+            }
+        }
+        
+        function retryFinalLevel() {
+            // Replay level 5
+            gameState.score = 400;
+            gameState.levelStartScore = 400;
+            gameState.level = 5;
+            gameState.levelComplete = false;
+            gameState.gameOver = false;
+            gameState.lives = 3;
+            gameState.multiShot = false;
+            gameState.multiShotTimer = 0;
+            gameState.lastScoreTime = Date.now();
+            gameState.escapedEnemies = 0;
+            gameState.shipLevel = 2; // Keep ultimate ship
+            gameState.bossTimer = 100;
+            gameState.bossStartTime = 0;
+            bullets = [];
+            enemies = [];
+            particles = [];
+            powerups = [];
+            boss = null;
+            bossBullets = [];
+            player.x = canvas.width / 2;
+            player.y = canvas.height - 80;
+            enemySpawnTimer = 0;
+            powerupSpawnTimer = 0;
+            
+            document.getElementById('victoryScreen').style.display = 'none';
+            document.getElementById('level5GameOver').style.display = 'none';
+            updateUI();
+            
+            // Resume gameplay tracking for Poki
+            if (typeof PokiSDK !== 'undefined') {
+                PokiSDK.gameplayStart();
+            }
+            
+            gameLoop();
+        }
+        
+        function endGame() {
+            gameState.gameOver = true;
+            
+            // Stop gameplay tracking for Poki
+            if (typeof PokiSDK !== 'undefined') {
+                PokiSDK.gameplayStop();
+            }
+            
+            // Show appropriate game over screen
+            const showGameOverScreen = () => {
+                // Check if player died on Level 5 (final level)
+                if (gameState.level === 5) {
+                    // Show Level 5 specific game over screen (green)
+                    document.getElementById('level5Score').textContent = gameState.score;
+                    document.getElementById('level5GameOver').style.display = 'block';
+                    document.getElementById('skipButton').style.display = 'none';
+                } else {
+                    // Show normal game over screen (red)
+                    document.getElementById('finalScore').textContent = gameState.score;
+                    document.getElementById('gameOver').style.display = 'block';
+                    document.getElementById('skipButton').style.display = 'none';
+                }
+            };
+            
+            // Show ad break, then show game over screen
+            if (typeof PokiSDK !== 'undefined') {
+                PokiSDK.commercialBreak().then(() => {
+                    showGameOverScreen();
+                });
+            } else {
+                showGameOverScreen();
+            }
+        }
+        
+        function restartGame() {
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.gameOver = false;
+            gameState.levelComplete = false;
+            gameState.multiShot = false;
+            gameState.multiShotTimer = 0;
+            gameState.level = 1;
+            gameState.levelStartScore = 0;
+            gameState.lastScoreTime = Date.now();
+            gameState.escapedEnemies = 0;
+            gameState.shipLevel = 0;
+            gameState.bossTimer = 100;
+            gameState.bossStartTime = 0;
+            bullets = [];
+            enemies = [];
+            particles = [];
+            powerups = [];
+            boss = null;
+            bossBullets = [];
+            player.x = canvas.width / 2;
+            player.y = canvas.height - 80;
+            enemySpawnTimer = 0;
+            powerupSpawnTimer = 0;
+            
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('levelComplete').style.display = 'none';
+            document.getElementById('levelUp').style.display = 'none';
+            document.getElementById('victoryScreen').style.display = 'none';
+            document.getElementById('level5GameOver').style.display = 'none';
+            document.getElementById('skipButton').style.display = 'block';
+            updateUI();
+            
+            // Resume gameplay tracking for Poki
+            if (typeof PokiSDK !== 'undefined') {
+                PokiSDK.gameplayStart();
+            }
+            
+            gameLoop();
+        }
+        
+        let lastTime = 0;
+        function gameLoop(timestamp = 0) {
+            if (gameState.gameOver || gameState.levelComplete) return;
+            
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update
+            updateStars();
+            updatePlayer();
+            
+            // Level 5 boss fight logic
+            if (gameState.level === 5) {
+                // Spawn boss if not yet spawned
+                if (!boss && enemies.length === 0) {
+                    spawnBoss();
+                    gameState.bossStartTime = Date.now();
+                }
+                
+                // Time-based scoring (same as other levels)
+                const currentTime = Date.now();
+                if (currentTime - gameState.lastScoreTime >= gameState.scoreInterval) {
+                    gameState.score++;
+                    gameState.lastScoreTime = currentTime;
+                    updateUI();
+                }
+                
+                // Update boss timer
+                if (boss) {
+                    const elapsed = Math.floor((Date.now() - gameState.bossStartTime) / 1000);
+                    gameState.bossTimer = Math.max(0, 100 - elapsed);
+                    
+                    // Time ran out - player dies
+                    if (gameState.bossTimer <= 0) {
+                        endGame();
+                    }
+                }
+                
+                updateBoss();
+            } else {
+                // Normal level scoring
+                const currentTime = Date.now();
+                if (currentTime - gameState.lastScoreTime >= gameState.scoreInterval) {
+                    gameState.score++;
+                    gameState.lastScoreTime = currentTime;
+                    checkLevelComplete();
+                    updateUI();
+                }
+            }
+            
+            // Check multi-shot timer
+            if (gameState.multiShot && Date.now() - gameState.multiShotTimer > gameState.multiShotDuration) {
+                gameState.multiShot = false;
+            }
+            
+            // Auto-shoot
+            const now = Date.now();
+            if (now - gameState.lastShot > gameState.shootCooldown) {
+                shoot();
+            }
+            
+            updateBullets();
+            updateEnemies();
+            updatePowerups();
+            updateParticles();
+            updateBossBullets();
+            checkCollisions();
+            
+            // Spawn enemies (faster at higher levels) - but not on level 5 (boss fight)
+            if (gameState.level !== 5) {
+                const currentSpawnInterval = Math.max(500, enemySpawnInterval - (gameState.level - 1) * 60);
+                enemySpawnTimer += deltaTime;
+                if (enemySpawnTimer > currentSpawnInterval) {
+                    spawnEnemy();
+                    enemySpawnTimer = 0;
+                }
+            }
+            
+            // Spawn powerups
+            powerupSpawnTimer += deltaTime;
+            if (powerupSpawnTimer > powerupSpawnInterval) {
+                spawnPowerup();
+                powerupSpawnTimer = 0;
+            }
+            
+            // Draw
+            drawStars();
+            drawParticles();
+            drawEnemies();
+            drawBoss();
+            drawBossBullets();
+            drawPowerups();
+            drawBullets();
+            drawPlayer();
+            
+            // Update UI
+            updateUI();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Initialize Poki SDK
+        PokiSDK.init().then(() => {
+            console.log("Poki SDK successfully initialized");
+            
+            // Simulate loading progress
+            let progress = 0;
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(loadingInterval);
+                    
+                    // Hide loading screen
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                    }, 500);
+                    
+                    // Tell Poki the game has loaded
+                    PokiSDK.gameLoadingFinished();
+                    // Start gameplay tracking
+                    PokiSDK.gameplayStart();
+                }
+                loadingBar.style.width = progress + '%';
+            }, 100);
+        }).catch(() => {
+            console.log("Initialized, but the user likely has adblock");
+            // Hide loading screen anyway
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+            }, 1000);
+        });
+        
+        // Start game
+        updateUI();
+        gameState.lastScoreTime = Date.now();
+        gameLoop();
+    </script>
+</body>
+</html>
